@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 import queryString from 'query-string';
 import classNames from 'classnames';
 
-import axios from 'axios';  
+import axios from 'axios';
 import './JsonViewer.scss';
 
 // Helper function to get highlighted parts of a string
@@ -132,6 +132,16 @@ const JsonViewer = ({ document, query: queryProp }) => {
     const fetchContent = async () => {
       setLoading(true);
       setError(null);
+
+      const currentFileSize = Number(document?.getProperty('fileSize')?.[0] ?? 0)
+
+      if (currentFileSize > 2500000) {
+        setError(intl.formatMessage({
+          id: 'jsonViewer.fileSizeLimit',
+          defaultMessage: 'JSON Viewer not available: File size limit exceeded.',
+        }));
+        setLoading(false);
+      }
       if (document && document.links && document.links.file) {
         try {
           const response = await axios.get(document.links.file, {
